@@ -12,18 +12,18 @@ Zillow or similar API, to get general info on property (Zestimate®, walk score,
     1.	What kinds of issues might you run into with your API?  
 No property matching address, multiple matches for an address, missing data for certain fields on certain addresses entered.
 
-    2.	Is there any sensitive information you need to secure?
+    2.	Is there any sensitive information you need to secure?  
 Login Passwords
 
-    3.	What functionality will your app include?
+    3.	What functionality will your app include?  
 Account creation, Login/Logout, edit account, searching for a property by address, entering property info manually, modifying property data (like rent & expenses), show various calculated investment property metrics for a property (like cap rate) that change when property data is changed, ability for a user to save properties to their account.
 
-    4.	What features make your site more than CRUD? Do you have any stretch goals?
+    4.	What features make your site more than CRUD? Do you have any stretch goals?  
 Add the ability to compare saved properties.
 
-    5.	What will the user flow look like?
+    5.	What will the user flow look like?  
 [![](https://github.com/JoeBusLife/capstone1/blob/main/documents/User%20Flow%20Chart.jpg)](https://github.com/JoeBusLife/capstone1/blob/main/documents/User%20Flow%20Chart.jpg)
 
-    6.	What does your database schema look like?
+    6.	What does your database schema look like?  
 Basic Idea, will need updating.
 [![](https://github.com/JoeBusLife/capstone1/blob/main/documents/Database%20Schema.jpg)](https://github.com/JoeBusLife/capstone1/blob/main/documents/Database%20Schema.jpg)
