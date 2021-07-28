@@ -7,7 +7,9 @@ The website will provide a number of API sourced, as well as calculated, metrics
 2.	User demographic:  
 Anyone looking to invest in properties (probably more first-time buyers, but also experienced buyers.)
 3.	Data I plan on using:  
-Zillow or similar API, to get general info on property (Zestimate®, walk score, sqft, lot size, Mortgage estimate, rent estimate etc.)
+Zillow or similar API, to get general info on property (Zestimate®, walk score, sqft, lot size, Mortgage estimate, rent estimate etc.)  
+https://rapidapi.com/realtymole/api/realty-mole-property-api/  
+https://rapidapi.com/moneals/api/rent-estimate/
 4.	In brief, outline your approach to creating your project (knowing that you may not know everything in advance and that these details might change later).  
     1.	What kinds of issues might you run into with your API?  
 No property matching address, multiple matches for an address, missing data for certain fields on certain addresses entered.
