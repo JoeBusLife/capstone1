@@ -1,0 +1,16 @@
+{% extends 'base.html'  %}
+{% block title %}{% endblock %}
+
+{% block h2 %}Welcome to Property Cat!{% endblock%}
+{% block content %}
+
+<h2>Search for a property or add your own</h2>
+
+<form>
+	{% include "_form.html" %}
+  <button id="prop-search" class="g-button" type="submit">Search</button>
+	<button id="custom-prop-link" class="" formaction="/">Create a custom property</button>
+</form>
+<!-- <a href="/">Create a custom property</a> -->
+
+{% endblock %}

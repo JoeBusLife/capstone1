@@ -1,0 +1,13 @@
+{% extends 'base.html'  %}
+
+{% block title %} Login{% endblock%}
+
+{% block h2 %}Login to your account{% endblock%}
+{% block content %}
+
+<form method="POST">
+	{% include "_form.html" %}
+  <button class="g-button" type="submit">Login</button>
+</form>
+
+{% endblock %}
