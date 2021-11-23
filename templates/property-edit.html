@@ -1,0 +1,41 @@
+{% extends 'base.html'  %}
+{% block title %} - {{'Edit' if prop else 'Create'}} Property{% endblock %}
+
+{% block h2 %}{{'Edit' if prop else 'Create'}} Property{% endblock%}
+{% block content %}
+
+<form>
+	{% include "_form.html" %}
+
+	
+	<label for="save">hi</label>
+	<table>
+		<tr>
+			<td><input id="save-1" name="save" type="radio" value="view" checked></td>
+			<td><label for="save-1">View Changes</label></td>
+		</tr>
+		{% if prop and prop.cu_saved %}
+		<tr>
+			<td><input id="save-2" name="save" type="radio" value="update"></td>
+			<td><label for="save-2">Save Changes to > {{prop.cu_saved.save_name}}</label></td>
+		</tr>
+		{% endif %}
+		<tr>
+			<td><input id="save-3" name="save" type="radio" value="new"></td>
+			<td><label for="save-3">Save New</label></td>
+		</tr>
+		
+
+	</table>
+	<p>
+		<label for="save-name">Save Name</label>
+		<input id="save-name" name="save-name" type="text">
+		<!-- value="prop.is_saved if prop.is_saved"
+			value="prop.cu_saved.save_name if prop.cu_saved else ''" 
+			disabled="disabled" -->
+	</p>
+	
+  <button class="g-button" type="submit" formmethod="POST">Submit</button>
+</form>
+
+{% endblock %}

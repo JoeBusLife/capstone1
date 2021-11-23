@@ -1,0 +1,72 @@
+{% extends 'base.html'  %}
+{% block title %} - Property{% endblock %}
+
+{% block h2 %}Property{% endblock%}
+{% block content %}
+
+
+{% for att, v in prop.__dict__.items() if 'save' not in att and 'search' not in att and 'instance' not in att and 'json' not in att and 'id' not in att %}
+<p>
+	{{ att.replace('_', ' ').title() }}: {{ v or '' }}
+</p>
+{% endfor %}
+
+<br>
+<p>
+	Cap Rate: {{ "{:,.2f}%".format(prop.cap_rate()*100) }}
+</p>
+<p>
+	Yearly Rent: {{ "${:,.2f}".format(prop.yearly_rent()) }}
+</p>
+<p>
+	Yearly Expenses: {{ "${:,.2f}".format(prop.yearly_expenses()) }}
+</p>
+<p>
+	Yearly Net: {{ "${:,.2f}".format(prop.net_rent()) }}
+</p>
+<p>
+	Monthly Net: {{ "${:,.2f}".format(prop.net_rent()/12) }}
+</p>
+
+<a class="b-button" href="/property/{{prop.id}}/edit">Edit Property</a>
+
+<p hidden data-json='{{(prop.json or {}).get("address")}}'> <p>
+
+
+<form>
+	
+
+	
+	<label for="save">hi</label>
+	<p>
+		<table>
+			<tr>
+				<td><input id="save-1" name="save" type="radio" value="view" checked></td>
+				<td><label for="save-1">View Changes</label></td>
+			</tr>
+			{% if prop and prop.cu_saved %}
+			<tr>
+				<td><input id="save-2" name="save" type="radio" value="update"></td>
+				<td><label for="save-2">Save Changes > {{prop.cu_saved.save_name}}</label></td>
+			</tr>
+			{% endif %}
+			<tr>
+				<td><input id="save-3" name="save" type="radio" value="save"></td>
+				<td><label for="save-3">Save New</label></td>
+			</tr>
+			
+
+		</table>
+		<p>
+			<label for="save-name">Save Name</label>
+			<input id="save-name" name="save-name" type="text" value="{{prop.cu_saved.save_name if prop.cu_saved else ''}}" >
+
+		</p>
+	</p>
+	
+  <button class="g-button" type="submit" formmethod="POST">Submit</button>
+</form>
+
+{% endblock %}
+
+

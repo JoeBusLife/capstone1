@@ -7,7 +7,7 @@
 	{% if field.required %}
 	<span class="required"> *</span>
 	{% endif %}
-  {{ field(class_="form-control") }}
+  {{ field(class_="form-control", type="range") }}
 
   {% for error in field.errors %}
   <span class="">{{ error }}</span>

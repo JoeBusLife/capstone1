@@ -1,0 +1,13 @@
+{% extends 'base.html'  %}
+{% block title %} - Edit Profile{% endblock %}
+
+{% block h2 %}Edit Profile{% endblock%}
+{% block content %}
+
+<form>
+	{% include "_form.html" %}
+  <button class="g-button" type="submit" formmethod="POST">Save</button>
+	<button class="cancel" formaction="{{url_for('user_page')}}" formmethod="GET">Cancel</button>
+</form>
+
+{% endblock %}

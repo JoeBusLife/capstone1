@@ -1,10 +1,15 @@
 """Models for Cupcake app."""
+from enum import unique
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_utils import EmailType, PasswordType
 from flask_bcrypt import Bcrypt
 from sqlalchemy.schema import CheckConstraint
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import validates
 from wtforms import PasswordField
+from flask_login import UserMixin, current_user
+
+from helpers import *
 
 from sqlalchemy_defaults import Column, make_lazy_configured
 
@@ -19,19 +24,20 @@ make_lazy_configured(db.mapper)
 def connect_db(app):
     db.app = app
     db.init_app(app)
+    
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __lazy_options__ = {}
     __tablename__ = 'users'
     
     username = Column(db.String(20),
                         label=u'Username*',
-                        primary_key=True)
+                        primary_key=True,
+                        unique=True)
     
     password = Column(db.String(60),
                         label=u'Password*',
-                        info={'form_field_class': PasswordField},
-                        nullable=False)
+                        info={'form_field_class': PasswordField})
     
     email = Column(EmailType(),
                         label=u'Email*',
@@ -51,15 +57,17 @@ class User(db.Model):
     
     
     @classmethod
-    def register(cls, username, password, email, first_name, last_name):
-        """Register user w/hashed password & return user."""
+    def signup(cls, username, password, email):
+        """Sign up user.
 
-        hashed = bcrypt.generate_password_hash(password)
-        # turn bytestring into normal (unicode utf8) string
-        hashed_utf8 = hashed.decode("utf8")
+        Hashes password and adds user to system.
+        """
 
+        hashed_pwd = bcrypt.generate_password_hash(password).decode('UTF-8')
+        
         # return instance of user w/username and hashed pwd
-        return cls(username=username, password=hashed_utf8, email=email, first_name=first_name, last_name=last_name)
+        return cls(username=username, password=hashed_pwd, email=email)
+    
 
     @classmethod
     def authenticate(cls, username, password):
@@ -76,6 +84,9 @@ class User(db.Model):
         else:
             return False
     
+    def get_id(self):
+        return self.username
+    
     def __repr__(self):
         u = self
         return f"<username={u.username} email={u.email} password={bool(u.password)}>"
@@ -90,23 +101,36 @@ class Property(db.Model):
                     primary_key=True,
                     autoincrement=True)
     
-    # username = Column(db.String(20),
-    #                     db.ForeignKey('users.username'))
-    
-    # save_name = Column(db.String(30),
-    #                     label=u'Save Name (Nickname)')
-    
     address = Column(db.String(),
-                        label=u'Address*')
+                        label=u'Address*',
+                        nullable=False)
     
     price = Column(db.Float(),
-                        label=u'Purchase Price')
+                        label=u'Purchase Price*',
+                        nullable=False)
     
     rent_monthly = Column(db.Float(),
-                        label=u'Total Monthly Rent')
+                        label=u'Total Monthly Rent*',
+                        nullable=False)
     
     units = Column(db.Float(),
                         label=u'Number of Units',
+                        nullable=True)
+    
+    beds = Column(db.Float(),
+                        label=u'Bedrooms',
+                        nullable=True)
+    
+    baths = Column(db.Float(),
+                        label=u'Bathrooms',
+                        nullable=True)
+    
+    sqft = Column(db.Float(),
+                        label=u'Structure Sqft',
+                        nullable=True)
+    
+    acres = Column(db.Float(),
+                        label=u'Land Size in Acres',
                         nullable=True)
     
     taxes_yearly = Column(db.Float(),
@@ -123,12 +147,12 @@ class Property(db.Model):
     
     property_managment = Column(db.Float(),
                         label=u'Property Management (As a percent of Rent)',
-                        default=10,
+                        default=10.0,
                         nullable=True)
     
     repair_maintenance = Column(db.Float(),
-                        label=u'Repair / Maintenancey (As a percent of Rent)',
-                        default=5,
+                        label=u'Repair / Maintenance (As a percent of Rent)',
+                        default=5.0,
                         nullable=True)
     
     closing_costs = Column(db.Float(),
@@ -137,17 +161,17 @@ class Property(db.Model):
     
     down_payment = Column(db.Float(),
                         label=u'Down Payment (Percentage)',
-                        default=20,
+                        default=20.0,
                         nullable=True)
     
     loan_rate = Column(db.Float(),
                         label=u'Loan Interest Rate',
-                        default=4,
+                        default=4.0,
                         nullable=True)
     
     vacancy_rate = Column(db.Float(),
                         label=u'Vacancy Rate (Percentage)',
-                        default=5,
+                        default=5.0,
                         nullable=True)
     
     hoa_fees = Column(db.Float(),
@@ -158,44 +182,121 @@ class Property(db.Model):
                         label=u'Other Expenses (Yearly)',
                         nullable=True)
     
+    json = Column(JSON,
+                  nullable=True)
+    
     
     
     
     saved_properties = db.relationship('SavedProperty', backref='properties', cascade="all, delete-orphan")
     
     
+    @classmethod
+    def save_new(cls, data):
+        ('================= ||| =================')
+        print(type(v) for v in data.values())
+        new_prop = cls(**data)
+        db.session.add(new_prop)
+        db.session.commit()
+
+        return new_prop
     
-    # address = db.Column(db.String(),
-    #                     nullable=False)
+    @classmethod
+    def get_data_for_db_from_estated_api(cls, data):
+        ('================= ||| =================')
+        
+        add = data.get('address') or {}
+        address = f"{add['formatted_street_address'].title()}, {add['city'].title()}, {add['state']} {add['zip_code']}"
+        
+        struct = data.get('structure') or {}
+        baths = ( (struct.get('baths') or 0) + (0.5 if struct.get('partial_baths_count') else 0) ) or None
+        
+        db_data = {
+            'address': address,
+            'price': data.get('valuation').get('value'),
+            'taxes_yearly': (data.get('taxes') or [{}])[0].get('amount'),
+            'units': struct.get('units_count') or 1,
+            'beds': struct.get('beds_count'),
+            'baths': baths,
+            'sqft': struct.get('total_area_sq_ft'),
+            'acres': (data.get('parcel') or {}).get('area_acres'),
+            'json': data
+        }
+        return db_data
     
-    # price = db.Column(db.Integer(),
-    #                     nullable=False)
+    # @classmethod
+    # def save_prop_after_login(cls, prop_to_save):
+    #     prop_id = prop_to_save.pop('prop_id')
+    #     save_name = prop_to_save.pop('save_name')
+    #     session.pop(f'prop_changes_id{prop_id}', None)
+    #     new_prop = Property.save_new(prop_to_save)
+    #     SP = SavedProperty(save_name=save_name, username=current_user.username, property_id=new_prop.   id)
+    #     flash(f'Property "{SP.save_name}" has been saved', "success")
+    #     return new_prop
+
     
-    # content = db.Column(db.Text,
-    #                     nullable=False)
+    def save_changes(p, form_data):
+        for k,v in form_data.items():
+            setattr(p, k, v)
+        db.session.commit()
+        
+    
+    def saved_state(p):
+        p.search = p.cu_saved = p.ou_saved = p.no_saves = False
+        saved_props = p.saved_properties
+        if saved_props:
+            for sp in saved_props:
+                if sp.username == 'search':
+                    p.search = True
+                elif current_user.is_authenticated and sp.username == current_user.username:
+                    p.cu_saved = sp
+                else:
+                    p.ou_saved = True
+        else:
+            p.no_saves = True
+    
+    
+    def yearly_property_managment(p):
+        return p.yearly_rent() * (none_to_0(p.property_managment)/100)
+    
+    def yearly_repair_maintenance(p):
+        return p.yearly_rent() * (none_to_0(p.repair_maintenance)/100)
+    
+    def yearly_expenses(p):
+        return none_to_0(p.taxes_yearly) + none_to_0(p.utilities_yearly) + none_to_0(p.insurance_yearly) + p.yearly_property_managment() + p.yearly_repair_maintenance() + none_to_0(p.hoa_fees) + none_to_0(p.other_expenses)
+    
+    def yearly_rent(p):
+        return p.rent_monthly * 12 * (1 - none_to_0(p.vacancy_rate)/100)
+    
+    def net_rent(p):
+        return p.yearly_rent() - p.yearly_expenses()
+    
+    def cap_rate(p):
+        return p.net_rent() / p.price
     
     
     def __repr__(self):
         p = self
-        return f"<Property {p.id} Address={p.address} Purchase Price={p.purchase_price} Units={p.number_of_units}>"
+        return f"<Property {p.id} | Address={p.address} | Purchase Price={getattr(p, 'price', 'N/A')} | Units={getattr(p, 'units', 'N/A')}>"
+
 
 
 class SavedProperty(db.Model):
     __lazy_options__ = {}
     __tablename__ = 'saved_properties'
     
-    save_name = Column(db.String(30),
-                        label=u'Save Name (Nickname)')
+    save_name = Column(db.String(200),
+                        label=u'Save Name (Nickname)',
+                        primary_key=True)
     
     username = Column(db.String(20),
                         db.ForeignKey('users.username'),
                         primary_key=True)
     
     property_id = Column(db.Integer,
-                        db.ForeignKey('properties.id'),
-                        primary_key=True)
+                        db.ForeignKey('properties.id'))
 
 
     def __repr__(self):
         sp = self
-        return f"<Save Name={sp.save_name} Username={sp.username} Property id={sp.property_id} Purchase Price={sp.properties.purchase_price}>"
+        return f"<Save Name={sp.save_name} | Username={sp.username} | Property id={sp.property_id} | Purchase Price={getattr(sp.properties, 'price', 'N/A')} | Units={getattr(sp.properties, 'units', 'N/A')}>"

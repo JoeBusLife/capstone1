@@ -8,9 +8,10 @@
 
 <form>
 	{% include "_form.html" %}
-  <button id="prop-search" class="g-button" type="submit">Search</button>
-	<button id="custom-prop-link" class="" formaction="/">Create a custom property</button>
+  <button id="prop-search" class="g-button" type="submit" formaction="{{url_for('property_search')}}" formmethod="POST">Search</button>
+	<!-- <button id="custom-prop-link" class="b-button" formaction="/">Create a custom property</button> -->
+	<a id="custom-prop-link" class="b-button" href="/property/new">Create a custom property</a>
 </form>
-<!-- <a href="/">Create a custom property</a> -->
+
 
 {% endblock %}

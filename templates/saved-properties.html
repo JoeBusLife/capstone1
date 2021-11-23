@@ -1,0 +1,50 @@
+{% extends 'base.html'  %}
+{% block title %} - Saved Properties{% endblock %}
+
+{% block h2 %}Saved Properties{% endblock%}
+{% block content %}
+
+{% if saved_props %}
+<form>
+	<table>
+		<thead>
+			<tr>
+				<th style="text-align: center;"><label for="compare">Compare</label></th>
+				<th style="text-align: center;">Save Name</th>
+				<th style="text-align: center;">Address</th>
+				<th style="text-align: center;">Price</th>
+				<th style="text-align: center;">Rent</th>
+				<th style="text-align: center;"># of Units</th>
+				<th style="text-align: center;">Sqft</th>
+				<th style="text-align: center;">Cap Rate</th>
+				<th style="text-align: center;"></th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for sp in saved_props %}
+			<tr>
+				<td style="text-align: center;"><span><input id="id-{{sp.property_id}}" name="compare{{sp.property_id}}" type="checkbox" value="{{sp.property_id}}"></span></td>
+				<td><span><a href="/property/{{sp.property_id}}">{{sp.save_name}}</a></span></td>
+				<td><span>{{sp.properties.address}}</span></td>
+				<td style="text-align: right;"><span>{{"${:,.2f}".format(sp.properties.price)}}</span></td>
+				<td style="text-align: right;"><span>{{"${:,.2f}".format(sp.properties.rent_monthly)}}</span></td>
+				<td><span>{{"{:,.1f}".format(sp.properties.units)}}</span></td>
+				<td><span>{{sp.properties.sqft or 'N/A'}}</span></td>
+				<td><span>{{"{:,.2f}%".format(sp.properties.cap_rate()*100)}}</span></td>
+				<td>
+					<button class="delete" formaction="{{url_for('user_saved_property_delete', save_name=sp.save_name)}}" formmethod="POST">Delete</button>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+
+	</table>
+
+	
+  <button class="g-button" type="submit" formmethod="POST">Compare</button>
+</form>
+{% else %}
+<div style="text-align: center;"><h3>- No Properties Saved -</h3></div>
+{% endif %}
+
+{% endblock %}H

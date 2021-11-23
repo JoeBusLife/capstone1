@@ -1,0 +1,21 @@
+{% extends 'base.html'  %}
+
+{% block title %} - {{current_user.username}}{% endblock%}
+
+{% block h2 %}Profile Info{% endblock%}
+{% block content %}
+
+<p class="">Username: {{current_user.username}}</p>
+<p class="">Email: {{current_user.email}}</p>
+
+<Form>
+	<button class="b-button" formaction="{{url_for('user_edit')}}">Edit Profile</button>
+	<button class="delete" formaction="{{url_for('user_delete')}}" formmethod="POST">Delete Account</button>
+</Form>
+
+<Form>
+	<button class="b-button" formaction="{{url_for('user_saved_properties')}}">Saved Properties</button>
+</Form>
+
+
+{% endblock %}
