@@ -1,0 +1,66 @@
+{% extends 'base.html'  %}
+{% block title %} - Property Compare{% endblock %}
+
+{% block h2 %}Property Compare{% endblock%}
+{% block content %}
+
+<table>
+	<thead>
+		<tr>
+			<th></th>
+			{% for prop in props %}
+			<th><a href="/property/{{prop.id}}">{{prop.save_name}}</a></th>
+			{% endfor %}
+		</tr>
+	</thead>
+	<tbody>
+		{% for att, vals in props_attrs.items() %}
+		<tr>
+			<td>{{ att.replace('_', ' ').title() }}</td>
+			{% for v in vals %}
+			<td>{{ v if v != None else '—'}}</td>
+			{% endfor %}
+		</tr>
+		{% endfor %}
+
+		
+		<tr>
+			<td>Cap Rate</td>
+			{% for prop in props %}
+			<td>{{ "{:,.2f}%".format(prop.cap_rate()*100) }}</td>
+			{% endfor %}
+		</tr>
+		<tr>
+			<td>Yearly Rent</td>
+			{% for prop in props %}
+			<td>{{ "${:,.2f}".format(prop.yearly_rent()) }}</td>
+			{% endfor %}
+		</tr>
+		<tr>
+			<td>Yearly Expenses</td>
+			{% for prop in props %}
+			<td>{{ "${:,.2f}".format(prop.yearly_expenses()) }}</td>
+			{% endfor %}
+		</tr>
+		<tr>
+			<td>Yearly Net</td>
+			{% for prop in props %}
+			<td>{{ "${:,.2f}".format(prop.net_rent()) }}</td>
+			{% endfor %}
+		</tr>
+		<tr>
+			<td>Monthly Net</td>
+			{% for prop in props %}
+			<td>{{ "${:,.2f}".format(prop.net_rent()/12) }}</td>
+			{% endfor %}
+		</tr>
+
+		
+	</tbody>
+</table>
+
+<a class="b-button" href="/user/saved-properties">Go to Saved Properties</a>
+
+{% endblock %}
+
+

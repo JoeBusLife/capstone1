@@ -7,7 +7,7 @@
 
 {% for att, v in prop.__dict__.items() if 'save' not in att and 'search' not in att and 'instance' not in att and 'json' not in att and 'id' not in att %}
 <p>
-	{{ att.replace('_', ' ').title() }}: {{ v or '' }}
+	{{ att.replace('_', ' ').title() }}: {{ v if v != None else 'N/A' }}
 </p>
 {% endfor %}
 
@@ -33,39 +33,7 @@
 <p hidden data-json='{{(prop.json or {}).get("address")}}'> <p>
 
 
-<form>
-	
 
-	
-	<label for="save">hi</label>
-	<p>
-		<table>
-			<tr>
-				<td><input id="save-1" name="save" type="radio" value="view" checked></td>
-				<td><label for="save-1">View Changes</label></td>
-			</tr>
-			{% if prop and prop.cu_saved %}
-			<tr>
-				<td><input id="save-2" name="save" type="radio" value="update"></td>
-				<td><label for="save-2">Save Changes > {{prop.cu_saved.save_name}}</label></td>
-			</tr>
-			{% endif %}
-			<tr>
-				<td><input id="save-3" name="save" type="radio" value="save"></td>
-				<td><label for="save-3">Save New</label></td>
-			</tr>
-			
-
-		</table>
-		<p>
-			<label for="save-name">Save Name</label>
-			<input id="save-name" name="save-name" type="text" value="{{prop.cu_saved.save_name if prop.cu_saved else ''}}" >
-
-		</p>
-	</p>
-	
-  <button class="g-button" type="submit" formmethod="POST">Submit</button>
-</form>
 
 {% endblock %}
 

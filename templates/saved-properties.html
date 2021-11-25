@@ -23,7 +23,7 @@
 		<tbody>
 			{% for sp in saved_props %}
 			<tr>
-				<td style="text-align: center;"><span><input id="id-{{sp.property_id}}" name="compare{{sp.property_id}}" type="checkbox" value="{{sp.property_id}}"></span></td>
+				<td style="text-align: center;"><span><input id="id-{{sp.property_id}}" name="compare{{sp.property_id}}" type="checkbox" value="{{sp.save_name}}"></span></td>
 				<td><span><a href="/property/{{sp.property_id}}">{{sp.save_name}}</a></span></td>
 				<td><span>{{sp.properties.address}}</span></td>
 				<td style="text-align: right;"><span>{{"${:,.2f}".format(sp.properties.price)}}</span></td>

@@ -70,7 +70,7 @@ p1 = Property(
 )
 
 p2 = Property(
-    address="522 Birch St, Reading, PA 19606",
+    address="522 Birch St, Reading, PA 19604",
     price=99000,
     rent_monthly=1295,
     units=2,

@@ -6,6 +6,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 # from psycopg2.errors import UniqueViolation
 from flask_login import LoginManager, login_manager, login_user, login_required, logout_user, current_user
+from sqlalchemy.orm import query
 
 from forms import UserSignupForm, UserLoginForm, UserEditForm, PropertySearchForm, PropertyForm, PropertyEditForm, PropertyCompareForm, form_creator
 from models import db, connect_db, User, Property, SavedProperty
@@ -416,9 +417,6 @@ def property_new_page():
     session['bad_form_data_property_new'] = request.form
     return redirect(url_for('property_new_page'))
 
-
-# @login_required
-# @app.route('/property/compare')
     
 @app.route('/user')
 @login_required
@@ -493,10 +491,17 @@ def user_saved_properties():
     # saved_props = SavedProperty.query.filter_by(username=current_user.username).all()
     saved_props = current_user.saved_properties
     
-    if request.form:
-        bro = [v for v in request.form.values()]
-        print('================= ||| =================')
-        print(bro)
+    if request.method == 'POST':
+        if request.form:
+            compare_save_names = [v for v in request.form.values()]
+            if len(compare_save_names) >= 2 and len(compare_save_names) <= 4:
+                return redirect(url_for('property_compare_page',    compare_save_names=compare_save_names))
+            else:
+                flash("Please select 2-4 properties to compare", 'danger')
+        else:
+            flash("Select properties to compare", 'danger')
+            
+        return redirect(url_for('user_saved_properties'))
         
     
     # form = form_creator(PropertyCompareForm())
@@ -527,11 +532,50 @@ def user_saved_property_delete(save_name):
     return redirect(url_for('user_saved_properties'))
 
 
+@login_required
+@app.route('/property/compare')
+def property_compare_page():
+    """  """
+    
+    compare_save_names = list(dict.fromkeys(request.args.getlist('compare_save_names')))
+    print('================= ||| =================')
+    print(compare_save_names)
+    if not (len(compare_save_names) >= 2 and len(compare_save_names) <= 4):
+        flash("Please select 2-4 properties to compare", 'danger')
+        return redirect(url_for('user_saved_properties'))
+    
+    print(request.url)
+    props = []
+    for save_name in compare_save_names:
+        saved_prop = SavedProperty.query.get((save_name, current_user.username))
+        if saved_prop:
+            prop = Property.query.get(saved_prop.property_id)
+            prop.save_name = saved_prop.save_name
+            props.append(prop)
+        else: 
+            flash("Invalid selection to compare", 'danger')
+            return redirect(url_for('user_saved_properties'))
+    
+    props_attrs = {}
+
+    for prop in props:
+        for att, v in prop.__dict__.items():
+            if 'save' not in att and 'search' not in att and 'instance' not in att and 'json' not in att and 'id' not in att:
+                if props_attrs.get(att):
+                    props_attrs[att].append(v)
+                else: props_attrs[att] = [v]
+                
+    # props_rows = [[att, *v] for att, v in props_attrs.items()]
+            
+    
+    return render_template('property-compare.html', props=props, props_attrs=props_attrs)
+ 
+                
+
 
 ### To-do ###
 # Add user password & username editing
 # 
 
 ### Bonus to-do ###
-# Add Compare Feature
 # Search for address in database first
